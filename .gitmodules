@@ -1,0 +1,6 @@
+[submodule "mandelbrot-viewer"]
+	path = mandelbrot-viewer
+	url = https://github.com/agherzan/mandelbrot-viewer
+[submodule "multi_try"]
+	path = multi_try
+	url = https://github.com/JoshMcguigan/multi_try.git
