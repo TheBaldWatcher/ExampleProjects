@@ -23,6 +23,25 @@ impl Vec3 {
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
+
+    pub fn dot(&self, rhs: &Self) -> f64 {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
+    }
+
+    pub fn cross(&self, rhs: &Self) -> Self {
+        // i    j   k
+        // x1   y1  z1
+        // x2   y2  z3
+        Vec3::new(
+            self.y * rhs.z - self.z * rhs.y,
+            self.z * rhs.x - self.x * rhs.z,
+            self.x * rhs.y - self.y * rhs.x,
+        )
+    }
+
+    pub fn unit(&self) -> Self {
+        self / self.length()
+    }
 }
 
 ///////// Neg //////////
@@ -349,3 +368,25 @@ fn test_length() {
     let vec3 = Vec3::new(5.0, 12.0, 0.0);
     assert_eq!(13.0, vec3.length())
 }
+
+#[test]
+fn test_dot() {
+    let v_1 = Vec3::new(3.0, 5.0, 7.0);
+    let v_2 = Vec3::new(11.0, 13.0, 17.0);
+
+    assert_eq!(v_1.dot(&v_2), 217.0)
+}
+
+#[test]
+fn test_cross() {
+    let v_1 = Vec3::new(3.0, 5.0, 7.0);
+    let v_2 = Vec3::new(11.0, 13.0, 17.0);
+
+    assert_eq!(v_1.cross(&v_2), Vec3::new(-6.0, 26.0, -16.0));
+}
+
+// #[test] 如何优雅地判断float？
+// fn test_unit() {
+//     let v = Vec3::new(3.0, 4.0, 0.0);
+//     assert_eq!(v.unit(), Vec3::new(0.6, 0.8, 0.0));
+// }

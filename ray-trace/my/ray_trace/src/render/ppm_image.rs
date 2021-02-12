@@ -1,4 +1,8 @@
+use crate::common::ray::Ray;
+use crate::common::vec3::Vec3;
+use crate::render::camera::Camera;
 use crate::render::color::RgbFloat;
+use crate::render::take_photo_settins::TakePhotoSettings;
 use {
     super::color::Color,
     std::{
@@ -17,15 +21,27 @@ pub struct PPMImage {
 impl PPMImage {
     pub fn new(width: usize, height: usize) -> Self {
         let mut colors = vec![Color::default(); width * height];
+
+        let focal_length = 1.0;
+        let origin = Vec3::new(0.0, 0.0, 0.0);
+        let horizontal = Vec3::new(2.0, 0.0, 0.0);
+        let vertical = Vec3::new(0.0, 2.0 * 16.0 / 9.0, 0.0);
+        let lower_left_corner =
+            &origin - &horizontal / 2.0 - &vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
+        // let camera = Camera::new();
+        // let take_photo_settings = TakePhotoSettings::new(&camera);
         for i in 0..height {
             for j in 0..width {
-                colors[i * width + j] = Color::RgbF(RgbFloat::new(
-                    i as f64 / ((width - 1) as f64),
-                    j as f64 / ((height - 1) as f64),
-                    0.25,
-                ))
+                let u = j as f64 / ((width - 1) as f64);
+                let v = i as f64 / ((height - 1) as f64);
+                let ray = Ray::new(
+                    origin.clone(),
+                    &lower_left_corner + u * &horizontal + v * &vertical - &origin,
+                );
+                colors[i * width + j] = TakePhotoSettings::ray_color(&ray);
             }
         }
+
         Self {
             width,
             height,

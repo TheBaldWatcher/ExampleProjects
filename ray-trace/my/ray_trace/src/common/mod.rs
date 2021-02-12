@@ -1,1 +1,2 @@
-mod vec3;
+pub(crate) mod ray;
+pub(crate) mod vec3;
