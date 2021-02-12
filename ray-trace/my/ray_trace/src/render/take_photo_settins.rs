@@ -14,13 +14,13 @@ fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> Option<f64> {
     // t^2 * b * b + 2t*b*(A-C) + (A-C)*(A-C) - r^2 = 0
     let oc = &ray.origin - center; // A-C
     let a = ray.direction.dot(&ray.direction);
-    let b = 2.0 * ray.direction.dot(&oc);
+    let h = ray.direction.dot(&oc);
     let c = oc.dot(&oc) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
+    let discriminant = h * h - a * c;
     if discriminant < 0.0 {
         None
     } else {
-        Some((-b - discriminant.sqrt()) / (2.0 * a))
+        Some((-h - discriminant.sqrt()) / a)
     }
 }
 
