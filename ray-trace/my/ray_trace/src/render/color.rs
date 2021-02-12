@@ -86,9 +86,9 @@ impl Color {
         }
     }
 
-    pub fn mix(&self, ratial: f64, rhs: Self) -> Self {
+    pub fn gradient(&self, ratial: f64, rhs: Self) -> Self {
         let r = ratial.max(0.0).min(1.0);
-        self * r + (1.0 - r) * rhs
+        self * (1.0 - r) + r * rhs
     }
 
     fn clamp<R: RangeBounds<f64>>(val: f64, range: R) -> f64 {
@@ -117,9 +117,9 @@ impl Add<&Color> for &Color {
         let f_lhs = self.float_form();
         let f_rhs = rhs.float_form();
         Color::newf(
-            Color::clamp((f_lhs.r + f_rhs.r) / 2.0, 0.0..=1.0),
-            Color::clamp((f_lhs.g + f_rhs.g) / 2.0, 0.0..=1.0),
-            Color::clamp((f_lhs.b + f_rhs.b) / 2.0, 0.0..=1.0),
+            Color::clamp((f_lhs.r + f_rhs.r), 0.0..=1.0),
+            Color::clamp((f_lhs.g + f_rhs.g), 0.0..=1.0),
+            Color::clamp((f_lhs.b + f_rhs.b), 0.0..=1.0),
         )
     }
 }

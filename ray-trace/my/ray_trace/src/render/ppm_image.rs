@@ -25,12 +25,12 @@ impl PPMImage {
         let focal_length = 1.0;
         let origin = Vec3::new(0.0, 0.0, 0.0);
         let horizontal = Vec3::new(2.0, 0.0, 0.0);
-        let vertical = Vec3::new(0.0, 2.0 * 16.0 / 9.0, 0.0);
+        let vertical = Vec3::new(0.0, 2.0 * 9.0 / 16.0, 0.0);
         let lower_left_corner =
             &origin - &horizontal / 2.0 - &vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
         // let camera = Camera::new();
         // let take_photo_settings = TakePhotoSettings::new(&camera);
-        for i in 0..height {
+        for i in (0..height).rev() {
             for j in 0..width {
                 let u = j as f64 / ((width - 1) as f64);
                 let v = i as f64 / ((height - 1) as f64);

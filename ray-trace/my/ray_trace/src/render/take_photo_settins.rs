@@ -1,25 +1,49 @@
-use crate::common::vec3::Vec3;
+use crate::common::vec3::{Point3, Vec3};
+use crate::geometry::world::World;
 use crate::render::color::Color;
 use crate::{common::ray::Ray, render::camera::Camera};
 
 #[derive(Debug)]
 pub struct TakePhotoSettings<'c> {
     camera: &'c Camera,
+    world: World,
+}
+
+fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> bool {
+    // Ray = A + t*B
+    // t^2 * b * b + 2t*b*(A-C) + (A-C)*(A-C) - r^2 = 0
+    let oc = &ray.origin - center; // A-C
+    let a = ray.direction.dot(&ray.direction);
+    let b = 2.0 * ray.direction.dot(&oc);
+    let c = oc.dot(&oc) - radius * radius;
+    let discriminant = b * b - 4.0 * a * c;
+    discriminant > 0.0
 }
 
 impl<'c> TakePhotoSettings<'c> {
-    pub const fn new(camera: &'c Camera) -> Self {
-        Self { camera }
+    pub const fn new(camera: &'c Camera, world: World) -> Self {
+        Self { camera, world }
+    }
+
+    ////// seter //////
+    // return Self, so we can chain
+    pub fn background<BG: Fn(&Ray) -> Color + Send + Sync + 'static>(mut self, bg: BG) -> Self {
+        self.world.set_bg(bg);
+        self
     }
 
     // TODO not pub,
     pub fn ray_color(ray: &Ray) -> Color {
+        if (hit_sphere(&Vec3::new(0.0, 0.0, -1.0), 0.5, &ray)) {
+            return Color::newf(1.0, 0.0, 1.0);
+        }
+
         let unit_direction = ray.direction.unit();
         // y's range is [-1, 1], t is [0, 1]
         let t = (unit_direction.y + 1.0) * 0.5;
         let a = Color::newf(1.0, 1.0, 1.0);
         let b = Color::newf(0.5, 0.7, 1.0);
-        a.mix(t, b)
+        a.gradient(t, b)
     }
 }
 
