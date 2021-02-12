@@ -1,6 +1,6 @@
+use crate::common::color::Color;
 use crate::common::vec3::{Point3, Vec3};
 use crate::geometry::world::World;
-use crate::render::color::Color;
 use crate::{common::ray::Ray, render::camera::Camera};
 
 #[derive(Debug)]
@@ -9,7 +9,7 @@ pub struct TakePhotoSettings<'c> {
     world: World,
 }
 
-fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> bool {
+fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> Option<f64> {
     // Ray = A + t*B
     // t^2 * b * b + 2t*b*(A-C) + (A-C)*(A-C) - r^2 = 0
     let oc = &ray.origin - center; // A-C
@@ -17,7 +17,11 @@ fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> bool {
     let b = 2.0 * ray.direction.dot(&oc);
     let c = oc.dot(&oc) - radius * radius;
     let discriminant = b * b - 4.0 * a * c;
-    discriminant > 0.0
+    if discriminant < 0.0 {
+        None
+    } else {
+        Some((-b - discriminant.sqrt()) / (2.0 * a))
+    }
 }
 
 impl<'c> TakePhotoSettings<'c> {
@@ -34,8 +38,12 @@ impl<'c> TakePhotoSettings<'c> {
 
     // TODO not pub,
     pub fn ray_color(ray: &Ray) -> Color {
-        if (hit_sphere(&Vec3::new(0.0, 0.0, -1.0), 0.5, &ray)) {
-            return Color::newf(1.0, 0.0, 1.0);
+        let center = Vec3::new(0.0, 0.0, -1.0);
+        if let Some(t) = hit_sphere(&center, 0.5, &ray) {
+            if t > 0.0 {
+                let n = (ray.at(t) - &center).unit();
+                return (0.5 * (n + Vec3::new(1.0, 1.0, 1.0))).into_color();
+            }
         }
 
         let unit_direction = ray.direction.unit();

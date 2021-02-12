@@ -1,3 +1,5 @@
+use crate::common::{color::Color, utils::clamp};
+
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
 };
@@ -41,6 +43,16 @@ impl Vec3 {
 
     pub fn unit(&self) -> Self {
         self / self.length()
+    }
+
+    // colorize a unit-length-vector
+    pub fn into_color(mut self, // sample_count :gamma
+    ) -> Color {
+        Color::newf(
+            clamp(self.x, 0.0..=1.0),
+            clamp(self.y, 0.0..=1.0),
+            clamp(self.z, 0.0..=1.0),
+        )
     }
 }
 

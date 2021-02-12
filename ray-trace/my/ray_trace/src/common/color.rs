@@ -1,5 +1,6 @@
+use crate::common::utils::clamp;
 use std::borrow::Cow;
-use std::ops::{Add, Bound, Mul, RangeBounds};
+use std::ops::{Add, Mul};
 use std::process::Output;
 
 /////////////// Rgb Float /////////
@@ -90,24 +91,6 @@ impl Color {
         let r = ratial.max(0.0).min(1.0);
         self * (1.0 - r) + r * rhs
     }
-
-    fn clamp<R: RangeBounds<f64>>(val: f64, range: R) -> f64 {
-        let start = match range.start_bound() {
-            Bound::Included(&x) | Bound::Excluded(&x) => x,
-            _ => std::f64::NEG_INFINITY,
-        };
-        let end = match range.end_bound() {
-            Bound::Included(&x) | Bound::Excluded(&x) => x,
-            _ => std::f64::INFINITY,
-        };
-        if start > val {
-            start
-        } else if val > end {
-            end
-        } else {
-            val
-        }
-    }
 }
 
 ////////// Add //////////
@@ -117,9 +100,9 @@ impl Add<&Color> for &Color {
         let f_lhs = self.float_form();
         let f_rhs = rhs.float_form();
         Color::newf(
-            Color::clamp((f_lhs.r + f_rhs.r), 0.0..=1.0),
-            Color::clamp((f_lhs.g + f_rhs.g), 0.0..=1.0),
-            Color::clamp((f_lhs.b + f_rhs.b), 0.0..=1.0),
+            clamp((f_lhs.r + f_rhs.r), 0.0..=1.0),
+            clamp((f_lhs.g + f_rhs.g), 0.0..=1.0),
+            clamp((f_lhs.b + f_rhs.b), 0.0..=1.0),
         )
     }
 }
@@ -151,9 +134,9 @@ impl Mul<f64> for &Color {
     fn mul(self, rhs: f64) -> Self::Output {
         let f = self.float_form();
         Color::newf(
-            Color::clamp(f.r * rhs, 0.0..=1.0),
-            Color::clamp(f.g * rhs, 0.0..=1.0),
-            Color::clamp(f.b * rhs, 0.0..=1.0),
+            clamp(f.r * rhs, 0.0..=1.0),
+            clamp(f.g * rhs, 0.0..=1.0),
+            clamp(f.b * rhs, 0.0..=1.0),
         )
     }
 }

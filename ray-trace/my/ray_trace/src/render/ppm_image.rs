@@ -1,14 +1,11 @@
+use crate::common::color::{Color, RgbFloat};
 use crate::common::ray::Ray;
 use crate::common::vec3::Vec3;
 use crate::render::camera::Camera;
-use crate::render::color::RgbFloat;
 use crate::render::take_photo_settins::TakePhotoSettings;
-use {
-    super::color::Color,
-    std::{
-        fs::File,
-        io::{BufWriter, Write},
-    },
+use std::{
+    fs::File,
+    io::{BufWriter, Write},
 };
 
 #[derive(Debug)]
@@ -24,8 +21,8 @@ impl PPMImage {
 
         let focal_length = 1.0;
         let origin = Vec3::new(0.0, 0.0, 0.0);
-        let horizontal = Vec3::new(2.0, 0.0, 0.0);
-        let vertical = Vec3::new(0.0, 2.0 * 9.0 / 16.0, 0.0);
+        let horizontal = Vec3::new(2.0 * 16.0 / 9.0, 0.0, 0.0);
+        let vertical = Vec3::new(0.0, 2.0, 0.0);
         let lower_left_corner =
             &origin - &horizontal / 2.0 - &vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
         // let camera = Camera::new();

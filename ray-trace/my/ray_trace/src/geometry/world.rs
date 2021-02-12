@@ -1,5 +1,5 @@
+use crate::common::color::Color;
 use crate::common::ray::Ray;
-use crate::render::color::Color;
 use std::fmt::{Debug, Formatter};
 
 pub struct World {
