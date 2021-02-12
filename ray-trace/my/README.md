@@ -1,0 +1,1 @@
+* ` ffmpeg -i %03d.ppm -c:v libx264 -vf fps=25 -pix_fmt yuv420p anime.mp4`
