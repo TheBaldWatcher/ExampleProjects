@@ -1,9 +1,14 @@
 use crate::common::color::Color;
 use crate::common::ray::Ray;
+use crate::geometry::aabb::AABB;
+use crate::geometry::bvh::BoundingVolumeHierachies;
+use crate::geometry::hit::HitRecord;
+use crate::geometry::Geometry;
 use std::fmt::{Debug, Formatter};
+use std::ops::Range;
 
 pub struct World {
-    // bvh
+    bvh: BoundingVolumeHierachies,
     bg_func: Box<dyn Fn(&Ray) -> Color + Send + Sync>,
 }
 
@@ -20,9 +25,9 @@ impl Debug for World {
 }
 
 impl World {
-    pub fn new() -> Self {
+    pub fn new(bvh: BoundingVolumeHierachies) -> Self {
         Self {
-            // bvh
+            bvh,
             bg_func: Box::new(default_background),
         }
     }
@@ -37,5 +42,15 @@ impl World {
     pub fn background(&self, ray: &Ray) -> Color {
         let f = &self.bg_func;
         f(ray)
+    }
+}
+
+impl Geometry for World {
+    fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
+        self.bvh.hit(ray, unit_limit)
+    }
+
+    fn bbox(&self, time_limit: Range<f64>) -> Option<AABB> {
+        self.bvh.bbox(time_limit)
     }
 }

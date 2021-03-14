@@ -1,5 +1,6 @@
 use crate::common::utils::clamp;
 use std::borrow::Cow;
+use std::iter::Sum;
 use std::ops::{Add, Mul};
 use std::process::Output;
 
@@ -90,6 +91,12 @@ impl Color {
     pub fn gradient(&self, ratial: f64, rhs: Self) -> Self {
         let r = ratial.max(0.0).min(1.0);
         self * (1.0 - r) + r * rhs
+    }
+}
+
+impl Sum for Color {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Self::default(), |acc, val| acc + val)
     }
 }
 

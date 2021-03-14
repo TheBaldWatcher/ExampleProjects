@@ -1,5 +1,6 @@
 use crate::common::{color::Color, utils::clamp};
 
+use std::iter::Sum;
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
 };
@@ -16,6 +17,22 @@ pub type Point3 = Vec3;
 impl Vec3 {
     pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
+    }
+
+    pub fn new_min(a: &Self, b: &Self) -> Self {
+        Self {
+            x: a.x.min(b.x),
+            y: a.y.min(b.y),
+            z: a.z.min(b.z),
+        }
+    }
+
+    pub fn new_max(a: &Self, b: &Self) -> Self {
+        Self {
+            x: a.x.max(b.x),
+            y: a.y.max(b.y),
+            z: a.z.max(b.z),
+        }
     }
 
     pub fn length_squared(&self) -> f64 {
@@ -53,6 +70,13 @@ impl Vec3 {
             clamp(self.y, 0.0..=1.0),
             clamp(self.z, 0.0..=1.0),
         )
+    }
+
+    // 反向
+    pub fn reverse(&mut self) {
+        self.x = -self.x;
+        self.y = -self.y;
+        self.z = -self.z;
     }
 }
 
@@ -247,6 +271,12 @@ impl DivAssign<f64> for Vec3 {
         self.z /= rhs;
     }
 }
+
+// impl Sum for Vec3 {
+//     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+//         iter.fold(Self::default(), |acc, val| acc + val)
+//     }
+// }
 
 ////////// UT //////////
 #[test]

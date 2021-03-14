@@ -1,32 +1,27 @@
 use crate::common::color::Color;
 use crate::common::vec3::{Point3, Vec3};
 use crate::geometry::world::World;
+use crate::geometry::Geometry;
+use crate::render::painter::Painter;
 use crate::{common::ray::Ray, render::camera::Camera};
+use std::f64::INFINITY;
+use std::path::Path;
 
 #[derive(Debug)]
 pub struct TakePhotoSettings<'c> {
     camera: &'c Camera,
     world: World,
-}
-
-fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> Option<f64> {
-    // Ray = A + t*B
-    // t^2 * b * b + 2t*b*(A-C) + (A-C)*(A-C) - r^2 = 0
-    let oc = &ray.origin - center; // A-C
-    let a = ray.direction.dot(&ray.direction);
-    let h = ray.direction.dot(&oc);
-    let c = oc.dot(&oc) - radius * radius;
-    let discriminant = h * h - a * c;
-    if discriminant < 0.0 {
-        None
-    } else {
-        Some((-h - discriminant.sqrt()) / a)
-    }
+    // depth
+    picture_height: usize,
 }
 
 impl<'c> TakePhotoSettings<'c> {
     pub const fn new(camera: &'c Camera, world: World) -> Self {
-        Self { camera, world }
+        Self {
+            camera,
+            world,
+            picture_height: 108,
+        }
     }
 
     ////// seter //////
@@ -36,32 +31,40 @@ impl<'c> TakePhotoSettings<'c> {
         self
     }
 
+    pub const fn height(mut self, height: usize) -> Self {
+        self.picture_height = height;
+        self
+    }
+
     // TODO not pub,
-    pub fn ray_color(ray: &Ray) -> Color {
+    fn ray_color(ray: &Ray, world: &World) -> Color {
         let center = Vec3::new(0.0, 0.0, -1.0);
-        if let Some(t) = hit_sphere(&center, 0.5, &ray) {
-            if t > 0.0 {
-                let n = (ray.at(t) - &center).unit();
-                return (0.5 * (n + Vec3::new(1.0, 1.0, 1.0))).into_color();
-            }
+        if let Some(hit) = world.hit(ray, 0.001..INFINITY) {
+            let material = hit.material;
+            let emmited = material.emitted(&hit.point).unwrap_or_default();
+            // hongfendong
+            return emmited.into_color();
         }
 
-        let unit_direction = ray.direction.unit();
-        // y's range is [-1, 1], t is [0, 1]
-        let t = (unit_direction.y + 1.0) * 0.5;
-        let a = Color::newf(1.0, 1.0, 1.0);
-        let b = Color::newf(0.5, 0.7, 1.0);
-        a.gradient(t, b)
+        world.background(ray).into()
     }
-}
 
-////////// UT //////////
-#[test]
-fn test_ray_color() {
-    {
-        let ray_left = Ray::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, -1.0, 0.0));
-        assert_eq!(TakePhotoSettings::ray_color(&ray_left).int_form().r, 127);
-        assert_eq!(TakePhotoSettings::ray_color(&ray_left).int_form().g, 127);
-        assert_eq!(TakePhotoSettings::ray_color(&ray_left).int_form().b, 127);
+    pub fn shot<P: AsRef<Path>>(&self, path: Option<P>) -> std::io::Result<()> {
+        // TODO what is this?
+        // #[allow(
+        //     clippy::cast_sign_loss,
+        //     clippy::cast_precision_loss,
+        //     clippy::cast_possible_truncation
+        // )]
+
+        Painter::new(
+            (self.picture_height as f64 * self.camera.aspect_ratio).round() as usize,
+            self.picture_height,
+        )
+        // gama.sapmles/thread.parallel
+        .draw(&path, |u, v| -> Color {
+            let ray = self.camera.ray(u, v);
+            Self::ray_color(&ray, &self.world) //hongfendong
+        })
     }
 }
