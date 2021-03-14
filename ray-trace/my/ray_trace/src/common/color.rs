@@ -1,4 +1,5 @@
 use crate::common::utils::clamp;
+use crate::common::vec3::Vec3;
 use std::borrow::Cow;
 use std::iter::Sum;
 use std::ops::{Add, Mul};
@@ -94,12 +95,6 @@ impl Color {
     }
 }
 
-impl Sum for Color {
-    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-        iter.fold(Self::default(), |acc, val| acc + val)
-    }
-}
-
 ////////// Add //////////
 impl Add<&Color> for &Color {
     type Output = Color;
@@ -166,6 +161,13 @@ impl Mul<Color> for f64 {
     type Output = Color;
     fn mul(self, rhs: Color) -> Self::Output {
         &rhs * self
+    }
+}
+
+impl Into<Vec3> for Color {
+    fn into(self) -> Vec3 {
+        let int_form = self.float_form();
+        Vec3::new(int_form.r as f64, int_form.g as f64, int_form.b as f64)
     }
 }
 

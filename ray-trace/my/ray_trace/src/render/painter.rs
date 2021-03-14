@@ -3,6 +3,7 @@ use crate::common::ray::Ray;
 use crate::common::vec3::Vec3;
 use crate::render::take_photo_settins::TakePhotoSettings;
 use log::info;
+use rand::{thread_rng, Rng};
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
@@ -14,7 +15,7 @@ use std::sync::atomic::Ordering;
 pub struct Painter {
     pub width: usize,
     pub height: usize,
-    // sample
+    samples: usize,
     // gamma//
     // threads
     // parallel
@@ -27,7 +28,16 @@ struct PainterOutputContext<'c> {
 
 impl Painter {
     pub const fn new(width: usize, height: usize) -> Self {
-        Self { width, height }
+        Self {
+            width,
+            height,
+            samples: 50,
+        }
+    }
+
+    pub const fn samples(mut self, samples: usize) -> Self {
+        self.samples = samples;
+        self
     }
     ////////// output file //////////
     fn create_output_file(
@@ -61,28 +71,35 @@ impl Painter {
 
     ///////// pixel //////////
     fn calculate_uv(&self, row: usize, col: usize) -> (f64, f64) {
-        if true {
+        if self.samples == 1 {
             let u = (col as f64) / self.width as f64;
             let v = ((self.height - 1 - row) as f64) / self.height as f64;
             (u, v)
         } else {
-            unimplemented!()
+            // 采样时，加扰动
+            // > The “less than” before the 1 is important as we will sometimes take advantage of that.
+            let u = (col as f64 + thread_rng().gen_range(0.0, 1.0)) / self.width as f64;
+            let v = ((self.height - 1 - row) as f64 + thread_rng().gen_range(0.0, 1.0))
+                / self.height as f64;
+            (u, v)
         }
     }
     fn render_pixel<F>(&self, row: usize, col: usize, uv_color: &F) -> (u8, u8, u8)
     where
         F: Fn(f64, f64) -> Color + Send + Sync,
     {
-        let color :Color =
-            // (0..self.samples) hongfendong
-            (0..1).map(|_| {
-            let (u,v) = self.calculate_uv(row, col);
-            uv_color(u,v)
-        })
-                .sum();
+        let color_need_average: Vec3 = (0..self.samples)
+            .map(|_| {
+                let (u, v) = self.calculate_uv(row, col);
+                uv_color(u, v)
+            })
+            .map(|e| e.into())
+            .sum();
 
-        // hongfendong
-        let color = color.int_form();
+        let color = color_need_average
+            .into_color(self.samples)
+            .int_form()
+            .into_owned();
         (color.r, color.g, color.b)
     }
 
@@ -102,7 +119,6 @@ impl Painter {
     where
         F: Fn(f64, f64) -> Color + Send + Sync + 'c,
     {
-        dbg!(self.height, self.width);
         (0..self.height).map(move |row| self.seq_render_row(row, &uv_color))
     }
 

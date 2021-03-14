@@ -63,8 +63,13 @@ impl Vec3 {
     }
 
     // colorize a unit-length-vector
-    pub fn into_color(mut self, // sample_count :gamma
+    pub fn into_color(
+        mut self,
+        samples: usize, // :gamma
     ) -> Color {
+        if 1 != samples {
+            self /= samples as f64;
+        }
         Color::newf(
             clamp(self.x, 0.0..=1.0),
             clamp(self.y, 0.0..=1.0),
@@ -269,6 +274,12 @@ impl DivAssign<f64> for Vec3 {
         self.x /= rhs;
         self.y /= rhs;
         self.z /= rhs;
+    }
+}
+
+impl Sum for Vec3 {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Self::default(), |acc, val| acc + val)
     }
 }
 

@@ -13,6 +13,7 @@ pub struct TakePhotoSettings<'c> {
     world: World,
     // depth
     picture_height: usize,
+    samples: usize, // 每个pixel的采样
 }
 
 impl<'c> TakePhotoSettings<'c> {
@@ -21,6 +22,7 @@ impl<'c> TakePhotoSettings<'c> {
             camera,
             world,
             picture_height: 108,
+            samples: 50,
         }
     }
 
@@ -36,6 +38,11 @@ impl<'c> TakePhotoSettings<'c> {
         self
     }
 
+    pub const fn samples(mut self, samples: usize) -> Self {
+        self.samples = samples;
+        self
+    }
+
     // TODO not pub,
     fn ray_color(ray: &Ray, world: &World) -> Color {
         let center = Vec3::new(0.0, 0.0, -1.0);
@@ -43,7 +50,7 @@ impl<'c> TakePhotoSettings<'c> {
             let material = hit.material;
             let emmited = material.emitted(&hit.point).unwrap_or_default();
             // hongfendong
-            return emmited.into_color();
+            return emmited.into_color(1);
         }
 
         world.background(ray).into()
@@ -62,6 +69,7 @@ impl<'c> TakePhotoSettings<'c> {
             self.picture_height,
         )
         // gama.sapmles/thread.parallel
+        .samples(self.samples)
         .draw(&path, |u, v| -> Color {
             let ray = self.camera.ray(u, v);
             Self::ray_color(&ray, &self.world) //hongfendong

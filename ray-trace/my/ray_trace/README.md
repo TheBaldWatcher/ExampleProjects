@@ -1,0 +1,2 @@
+Camera负责视角
+Painter负责在该视角下，sample，gama等渲染细节

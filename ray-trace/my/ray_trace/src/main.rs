@@ -9,7 +9,6 @@ use crate::common::vec3::{Point3, Vec3};
 use crate::geometry::list::GeometryList;
 use crate::geometry::world::default_background;
 use crate::render::camera::CameraBuilder;
-use crate::render::ppm_image::PPMImage;
 
 // use crate::render;
 fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> Option<(f64, Vec3)> {
@@ -49,7 +48,7 @@ fn background(ray: &Ray) -> Color {
         .flatten()
         .min_by(|a, b| a.0.partial_cmp(&b.0).unwrap())
     {
-        return (0.5 * (n + Vec3::new(1.0, 1.0, 1.0))).into_color();
+        return (0.5 * (n + Vec3::new(1.0, 1.0, 1.0))).into_color(1);
     }
 
     let unit = ray.direction.unit();
@@ -75,6 +74,7 @@ fn main() {
         .take_photo(world)
         .background(background)
         .height(IMAGE_HEIGHT)
+        .samples(10)
         // .gamma.samples
         .shot(Some(FILE_PATH))
         .unwrap();
