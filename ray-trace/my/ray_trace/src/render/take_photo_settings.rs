@@ -13,6 +13,7 @@ pub struct TakePhotoSettings<'c> {
     world: World,
     max_reflection: usize, // depth
     picture_height: usize,
+    gamma: bool,
     samples: usize, // 每个pixel的采样
 }
 
@@ -23,6 +24,7 @@ impl<'c> TakePhotoSettings<'c> {
             world,
             max_reflection: 8,
             picture_height: 108,
+            gamma: true,
             samples: 50,
         }
     }
@@ -44,6 +46,11 @@ impl<'c> TakePhotoSettings<'c> {
         self
     }
 
+    pub const fn gamma(mut self, gamma: bool) -> Self {
+        self.gamma = gamma;
+        self
+    }
+
     pub const fn samples(mut self, samples: usize) -> Self {
         self.samples = samples;
         self
@@ -59,7 +66,7 @@ impl<'c> TakePhotoSettings<'c> {
             let emitted = material
                 .emitted(hit.u, hit.v, &hit.point)
                 .unwrap_or_default()
-                .into_color(1);
+                .into_color(1, false);
 
             // scatter成新的光线
             if let Some(scattered) = material.scatter(ray, hit) {
@@ -89,6 +96,7 @@ impl<'c> TakePhotoSettings<'c> {
             self.picture_height,
         )
         // gama.sapmles/thread.parallel
+        .gamma(self.gamma)
         .samples(self.samples)
         .draw(&path, |u, v| -> Color {
             let ray = self.camera.ray(u, v);

@@ -81,12 +81,14 @@ impl Vec3 {
     }
 
     // colorize a unit-length-vector
-    pub fn into_color(
-        mut self,
-        samples: usize, // :gamma
-    ) -> Color {
+    pub fn into_color(mut self, samples: usize, gamma: bool) -> Color {
         if 1 != samples {
             self /= samples as f64;
+        }
+        if gamma {
+            self.x = self.x.sqrt();
+            self.y = self.y.sqrt();
+            self.z = self.z.sqrt();
         }
         Color::newf(
             clamp(self.x, 0.0..=1.0),

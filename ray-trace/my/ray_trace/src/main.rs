@@ -71,6 +71,7 @@ fn main() {
         .max_reflection(8)
         .height(IMAGE_HEIGHT)
         .samples(100)
+        .gamma(true)
         // .gamma.samples
         .shot(Some(FILE_PATH))
         .unwrap();

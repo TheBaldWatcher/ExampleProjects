@@ -16,7 +16,7 @@ pub struct Painter {
     pub width: usize,
     pub height: usize,
     samples: usize,
-    // gamma//
+    gamma: bool,
     // threads
     // parallel
 }
@@ -32,7 +32,13 @@ impl Painter {
             width,
             height,
             samples: 50,
+            gamma: true,
         }
+    }
+
+    pub const fn gamma(mut self, gamma: bool) -> Self {
+        self.gamma = gamma;
+        self
     }
 
     pub const fn samples(mut self, samples: usize) -> Self {
@@ -97,7 +103,7 @@ impl Painter {
             .sum();
 
         let color = color_need_average
-            .into_color(self.samples)
+            .into_color(self.samples, self.gamma)
             .int_form()
             .into_owned();
         (color.r, color.g, color.b)
