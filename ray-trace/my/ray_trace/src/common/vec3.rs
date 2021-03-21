@@ -1,6 +1,7 @@
 use crate::common::{color::Color, utils::clamp};
 
 use rand::{thread_rng, Rng};
+use std::f64::consts::PI;
 use std::iter::Sum;
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
@@ -50,6 +51,25 @@ impl Vec3 {
             if p.length_squared() < 1.0 {
                 return p;
             }
+        }
+    }
+
+    // hongfendong must_use?
+    #[must_use]
+    pub fn random_unit() -> Self {
+        let a: f64 = thread_rng().gen_range(0.0, 2 as f64 * PI);
+        let z: f64 = thread_rng().gen_range(-1.0, 1.0);
+        let r = (1.0 - z * z).sqrt();
+        Self::new(r * a.cos(), r * a.sin(), z)
+    }
+
+    #[must_use]
+    pub fn random_unit_dir(dir: &Self) -> Self {
+        let u = Self::random_unit();
+        if u.dot(dir) > 0.0 {
+            u
+        } else {
+            -u
         }
     }
 

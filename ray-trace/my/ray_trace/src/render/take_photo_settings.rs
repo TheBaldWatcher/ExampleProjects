@@ -61,7 +61,10 @@ impl<'c> TakePhotoSettings<'c> {
         if remain_reflection == 0 {
             return Color::default();
         }
-        if let Some(hit) = world.hit(ray, 0.001..INFINITY) {
+        if let Some(hit) = world.hit(
+            ray,
+            0.001..INFINITY, // not 0.000...INFINITY, $8.23 Fixing Shadow Acne
+        ) {
             let material = hit.material;
             let emitted = material
                 .emitted(hit.u, hit.v, &hit.point)
@@ -71,8 +74,7 @@ impl<'c> TakePhotoSettings<'c> {
             // scatter成新的光线
             if let Some(scattered) = material.scatter(ray, hit) {
                 // return emitted.gradient(
-                //     // hongfendong scattered.color *
-                //     0.5,
+                //     // hongfendong scatter                //     0.5,
                 //     Self::ray_color(&scattered.ray, world, remain_reflection - 1),
                 // );
                 return 0.5 * Self::ray_color(&scattered.ray, world, remain_reflection - 1);

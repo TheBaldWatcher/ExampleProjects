@@ -7,14 +7,16 @@ use crate::texture::Texture;
 #[derive(Debug, Clone)]
 pub enum LambertianMathType {
     Approximate,
-    // True,
-    // Hemisphere,
+    True,
+    Hemisphere,
 }
 
 impl LambertianMathType {
     pub fn scatter_ray(&self, ray: &Ray, hit: HitRecord<'_>) -> Ray {
         match self {
             Self::Approximate => Ray::new(hit.point, hit.normal + Vec3::random_in_unit_sphere()),
+            Self::True => Ray::new(hit.point, hit.normal + Vec3::random_unit()),
+            Self::Hemisphere => Ray::new(hit.point, Vec3::random_unit_dir(&hit.normal)),
         }
     }
 }

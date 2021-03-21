@@ -61,7 +61,7 @@ fn main() {
         .add(Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
-            Lambertian::new(Color::newf(0.5, 0.5, 0.5)).math_type(LambertianMathType::Approximate),
+            Lambertian::new(Color::newf(0.5, 0.5, 0.5)).math_type(LambertianMathType::True),
         ));
 
     let camera = CameraBuilder::default().aspect_ratio(ASPECT_RATIO).build();
