@@ -4,6 +4,7 @@ use crate::geometry::aabb::AABB;
 use crate::geometry::hit::HitRecord;
 use crate::geometry::Geometry;
 use crate::material::Material;
+use std::f64::consts::PI;
 use std::ops::Range;
 use std::os::macos::raw::time_t;
 
@@ -32,6 +33,16 @@ impl<M: Material> Geometry for Sphere<M> {
         &self.material
     }
 
+    // hongfendong 不明白
+    fn uv(&self, point: &Point3) -> (f64, f64) {
+        let point = (point - &self.center).unit();
+        let phi = (-point.z).atan2(point.x); // [-pi, pi]
+        let theta = point.y.asin(); // [-pi / 2 , pi / 2]
+        let u = phi / 2.0 / PI + 0.5;
+        let v = theta / PI + 0.5;
+        (u, v)
+    }
+
     fn hit(&self, ray: &Ray, unit_limit: Range<f64>) -> Option<HitRecord<'_>> {
         // Ray = A + t*B
         // t^2 * b * b + 2t*b*(A-C) + (A-C)*(A-C) - r^2 = 0
@@ -56,16 +67,21 @@ impl<M: Material> Geometry for Sphere<M> {
             return Some(HitRecord::new(ray, self, root_2));
         }
 
-        unreachable!()
+        None
     }
 
     fn bbox(&self, time_limit: Range<f64>) -> Option<AABB> {
         Some(
             // TODO if
-            AABB::new(
-                &self.center - Vec3::new(self.radius, self.radius, self.radius),
-                &self.center - Vec3::new(self.radius, self.radius, self.radius),
-            ),
+            if false {
+                unimplemented!()
+            } else {
+                // TODO time_limit
+                AABB::new(
+                    &self.center - Vec3::new(self.radius, self.radius, self.radius),
+                    &self.center + Vec3::new(self.radius, self.radius, self.radius),
+                )
+            },
         )
     }
 }

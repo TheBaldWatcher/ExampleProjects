@@ -1,5 +1,6 @@
 use crate::common::{color::Color, utils::clamp};
 
+use rand::{thread_rng, Rng};
 use std::iter::Sum;
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
@@ -32,6 +33,23 @@ impl Vec3 {
             x: a.x.max(b.x),
             y: a.y.max(b.y),
             z: a.z.max(b.z),
+        }
+    }
+
+    pub fn random_in_unit_box() -> Self {
+        Self::new(
+            thread_rng().gen_range(-1.0, 1.0),
+            thread_rng().gen_range(-1.0, 1.0),
+            thread_rng().gen_range(-1.0, 1.0),
+        )
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let p = Self::random_in_unit_box();
+            if p.length_squared() < 1.0 {
+                return p;
+            }
         }
     }
 

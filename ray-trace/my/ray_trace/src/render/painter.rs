@@ -1,7 +1,7 @@
 use crate::common::color::Color;
 use crate::common::ray::Ray;
 use crate::common::vec3::Vec3;
-use crate::render::take_photo_settins::TakePhotoSettings;
+use crate::render::take_photo_settings::TakePhotoSettings;
 use log::info;
 use rand::{thread_rng, Rng};
 use std::fs::File;

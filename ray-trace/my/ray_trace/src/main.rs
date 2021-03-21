@@ -2,12 +2,15 @@ mod common;
 mod geometry;
 mod material;
 mod render;
+mod texture;
 
 use crate::common::color::Color;
 use crate::common::ray::Ray;
 use crate::common::vec3::{Point3, Vec3};
 use crate::geometry::list::GeometryList;
+use crate::geometry::sphere::Sphere;
 use crate::geometry::world::default_background;
+use crate::material::lambertian::{Lambertian, LambertianMathType};
 use crate::render::camera::CameraBuilder;
 
 // use crate::render;
@@ -28,37 +31,19 @@ fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> Option<(f64, Vec3)> {
             let p = ray.at(t1);
             let n = (p - center) / radius;
             Some((t1, n))
-        // } else if t2 > 0.0 {
-        //     let p = ray.at(t2);
-        //     let n = (p - center) / radius;
-        //     Some((t2, n))
+        } else if t2 > 0.0 {
+            let p = ray.at(t2);
+            let n = (p - center) / radius;
+            Some((t2, n))
         } else {
             None
         }
     }
 }
 
-fn background(ray: &Ray) -> Color {
-    let ts = vec![
-        hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.5, ray),
-        hit_sphere(&Point3::new(0.0, -100.5, -1.0), 100.0, ray),
-    ];
-    if let Some((_, n)) = ts
-        .into_iter()
-        .flatten()
-        .min_by(|a, b| a.0.partial_cmp(&b.0).unwrap())
-    {
-        return (0.5 * (n + Vec3::new(1.0, 1.0, 1.0))).into_color(1);
-    }
-
-    let unit = ray.direction.unit();
-    let t = 0.5 * (unit.y + 1.0);
-    Color::newf(1.0, 1.0, 1.0).gradient(t, Color::newf(0.5, 0.7, 1.0))
-}
-
 fn main() {
     const ASPECT_RATIO: f64 = 2.00;
-    const IMAGE_HEIGHT: usize = 512;
+    const IMAGE_HEIGHT: usize = 100;
     // const IMAGE_WIDTH: usize = (IMAGE_HEIGHT as f64 * ASPECT_RATIO) as usize;
 
     const FILE_PATH: &str =
@@ -66,15 +51,26 @@ fn main() {
 
     env_logger::init();
 
-    let world = GeometryList::default();
+    let mut world = GeometryList::default();
+    world
+        .add(Sphere::new(
+            Point3::new(0.0, -100.5, -1.0),
+            100.0,
+            Lambertian::new(Color::newf(0.5, 0.5, 0.5)).math_type(LambertianMathType::Approximate),
+        ))
+        .add(Sphere::new(
+            Point3::new(0.0, 0.0, -1.0),
+            0.5,
+            Lambertian::new(Color::newf(0.5, 0.5, 0.5)).math_type(LambertianMathType::Approximate),
+        ));
 
     let camera = CameraBuilder::default().aspect_ratio(ASPECT_RATIO).build();
 
     camera
         .take_photo(world)
-        .background(background)
+        .max_reflection(8)
         .height(IMAGE_HEIGHT)
-        .samples(10)
+        .samples(100)
         // .gamma.samples
         .shot(Some(FILE_PATH))
         .unwrap();

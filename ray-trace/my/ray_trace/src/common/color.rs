@@ -1,5 +1,6 @@
 use crate::common::utils::clamp;
-use crate::common::vec3::Vec3;
+use crate::common::vec3::{Point3, Vec3};
+use crate::texture::Texture;
 use std::borrow::Cow;
 use std::iter::Sum;
 use std::ops::{Add, Mul};
@@ -161,6 +162,12 @@ impl Mul<Color> for f64 {
     type Output = Color;
     fn mul(self, rhs: Color) -> Self::Output {
         &rhs * self
+    }
+}
+
+impl Texture for Color {
+    fn color(&self, _u: f64, _v: f64, _point: &Point3) -> Color {
+        self.clone()
     }
 }
 

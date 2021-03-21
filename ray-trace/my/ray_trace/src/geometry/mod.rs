@@ -9,7 +9,7 @@ mod aabb;
 mod bvh;
 pub(crate) mod hit;
 pub(crate) mod list;
-mod sphere;
+pub(crate) mod sphere;
 pub(crate) mod world;
 
 // TODO Send+Sync
@@ -26,6 +26,13 @@ pub trait Geometry: Send + Sync {
     fn material(&self) -> &dyn Material {
         unimplemented!(
             "{}'s material function should not be called directly",
+            std::any::type_name::<Self>()
+        )
+    }
+
+    fn uv(&self, point: &Point3) -> (f64, f64) {
+        unimplemented!(
+            "{}'s uv function should not be called directly",
             std::any::type_name::<Self>()
         )
     }

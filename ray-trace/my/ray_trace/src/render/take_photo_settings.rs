@@ -11,7 +11,7 @@ use std::path::Path;
 pub struct TakePhotoSettings<'c> {
     camera: &'c Camera,
     world: World,
-    // depth
+    max_reflection: usize, // depth
     picture_height: usize,
     samples: usize, // 每个pixel的采样
 }
@@ -21,6 +21,7 @@ impl<'c> TakePhotoSettings<'c> {
         Self {
             camera,
             world,
+            max_reflection: 8,
             picture_height: 108,
             samples: 50,
         }
@@ -30,6 +31,11 @@ impl<'c> TakePhotoSettings<'c> {
     // return Self, so we can chain
     pub fn background<BG: Fn(&Ray) -> Color + Send + Sync + 'static>(mut self, bg: BG) -> Self {
         self.world.set_bg(bg);
+        self
+    }
+
+    pub const fn max_reflection(mut self, max_reflection: usize) -> Self {
+        self.max_reflection = max_reflection;
         self
     }
 
@@ -44,13 +50,27 @@ impl<'c> TakePhotoSettings<'c> {
     }
 
     // TODO not pub,
-    fn ray_color(ray: &Ray, world: &World) -> Color {
-        let center = Vec3::new(0.0, 0.0, -1.0);
+    fn ray_color(ray: &Ray, world: &World, remain_reflection: usize) -> Color {
+        if remain_reflection == 0 {
+            return Color::default();
+        }
         if let Some(hit) = world.hit(ray, 0.001..INFINITY) {
             let material = hit.material;
-            let emmited = material.emitted(&hit.point).unwrap_or_default();
-            // hongfendong
-            return emmited.into_color(1);
+            let emitted = material
+                .emitted(hit.u, hit.v, &hit.point)
+                .unwrap_or_default()
+                .into_color(1);
+
+            // scatter成新的光线
+            if let Some(scattered) = material.scatter(ray, hit) {
+                // return emitted.gradient(
+                //     // hongfendong scattered.color *
+                //     0.5,
+                //     Self::ray_color(&scattered.ray, world, remain_reflection - 1),
+                // );
+                return 0.5 * Self::ray_color(&scattered.ray, world, remain_reflection - 1);
+            }
+            return emitted;
         }
 
         world.background(ray).into()
@@ -72,7 +92,7 @@ impl<'c> TakePhotoSettings<'c> {
         .samples(self.samples)
         .draw(&path, |u, v| -> Color {
             let ray = self.camera.ray(u, v);
-            Self::ray_color(&ray, &self.world) //hongfendong
+            Self::ray_color(&ray, &self.world, self.max_reflection) //hongfendong
         })
     }
 }

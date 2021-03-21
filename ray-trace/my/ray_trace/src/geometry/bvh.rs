@@ -50,14 +50,15 @@ impl BoundingVolumeHierachies {
         } else if count == 2 {
             let left = objects[index.start].take().unwrap();
             let right = objects[index.start + 1].take().unwrap();
-            let left_box = left
+            let left_bbox = left
                 .bbox(time_limit.clone())
                 .expect("No bounding box in bvh_node constructor.");
-            let right_box = right
+            let right_bbox = right
                 .bbox(time_limit.clone())
                 .expect("No bounding box in bvh_node constructor.");
+
             Self {
-                bbox: Some(left_box | right_box),
+                bbox: Some(left_bbox | right_bbox),
                 left: Some(left),
                 right: Some(right),
             }

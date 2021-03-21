@@ -2,7 +2,7 @@ use crate::common::ray::Ray;
 use crate::common::vec3::{Point3, Vec3};
 use crate::geometry::list::GeometryList;
 use crate::geometry::world::World;
-use crate::render::take_photo_settins::TakePhotoSettings;
+use crate::render::take_photo_settings::TakePhotoSettings;
 
 #[derive(Debug)]
 pub struct Camera {
@@ -63,6 +63,7 @@ impl Camera {
         let direction =
             &self.left_bottom + u * &self.horizontal_full + v * &self.vertical_full - &origin;
         // dbg!(
+        //     &direction,
         //     &self.left_bottom,
         //     u * &self.horizontal_full,
         //     v * &self.vertical_full,

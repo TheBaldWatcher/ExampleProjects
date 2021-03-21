@@ -9,6 +9,8 @@ pub struct HitRecord<'m> {
     pub normal: Vec3,
     pub material: &'m dyn Material,
     pub unit: f64,
+    pub u: f64, // hongfendong ,uv 干啥的？
+    pub v: f64,
     pub outside: bool,
 }
 
@@ -29,11 +31,15 @@ impl<'m> HitRecord<'m> {
         if !outside {
             normal.reverse();
         }
+        let material = obj.material();
+        let (u, v) = obj.uv(&point);
         Self {
             point,
             normal,
-            material: obj.material(),
+            material,
             unit,
+            u,
+            v,
             outside,
         }
     }

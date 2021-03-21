@@ -1,3 +1,5 @@
+pub(crate) mod lambertian;
+
 use crate::common::color::Color;
 use crate::common::ray::Ray;
 use crate::common::vec3::{Point3, Vec3};
@@ -15,13 +17,13 @@ pub trait Material: Send + Sync {
         None
     }
 
-    fn emitted(&self, point: &Point3) -> Option<Vec3> {
+    fn emitted(&self, u: f64, v: f64, point: &Point3) -> Option<Vec3> {
         None
     }
 }
 
 impl<M: Material> Material for Arc<M> {
-    fn emitted(&self, point: &Point3) -> Option<Vec3> {
+    fn emitted(&self, u: f64, v: f64, point: &Point3) -> Option<Vec3> {
         Some(point.clone())
     }
 }
