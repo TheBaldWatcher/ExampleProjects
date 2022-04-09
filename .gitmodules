@@ -4,3 +4,6 @@
 [submodule "multi_try"]
 	path = multi_try
 	url = https://github.com/JoshMcguigan/multi_try.git
+[submodule "talent-plan"]
+	path = talent-plan
+	url = https://github.com/pingcap/talent-plan.git
